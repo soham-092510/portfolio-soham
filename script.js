@@ -333,15 +333,15 @@ function loadProfileFallback() {
   }
 }
 
-function loadCertFallback() {
-  const certPreview = document.querySelector('.cert-image-preview');
-  if (certPreview) {
-    certPreview.innerHTML = `
-      <div class="cert-placeholder">
-        <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-        <h4>Data Science with Python</h4>
-        <p>Interactive Certificate Image</p>
-        <span style="font-size:0.7rem; color:var(--color-gold); margin-top:0.5rem; text-decoration:underline;">Click to Preview Fallback</span>
+function loadCertFallback(imgEl) {
+  const targetPreview = imgEl ? imgEl.closest('.cert-image-preview') : document.querySelector('.cert-image-preview');
+  if (targetPreview) {
+    const titleText = imgEl ? imgEl.alt : "Professional Certificate";
+    targetPreview.innerHTML = `
+      <div class="cert-placeholder" style="display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; width: 100%; padding: 1.5rem;">
+        <svg viewBox="0 0 24 24" style="width: 40px; height: 40px; fill: var(--color-gold); margin-bottom: 0.5rem;"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
+        <h4 style="font-size: 0.95rem; color: var(--color-cream); margin-bottom: 0.25rem; font-family: var(--font-sans); font-weight: 600;">${titleText}</h4>
+        <p style="font-size: 0.75rem; color: var(--color-muted);">Certificate Preview Placeholder</p>
       </div>
       <div class="cert-overlay">
         <span>View Details</span>
