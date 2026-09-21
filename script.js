@@ -17,9 +17,11 @@ function initTypingEffect() {
   if (!targetElement) return;
 
   const designations = [
-    "Machine Learning Engineer",
-    "Data Scientist",
-    "DevOps Learner"
+    "AI / ML Engineer",
+    "CSE Student @ SPIT Mumbai",
+    "Generative AI & Multimodal Systems Architect",
+    "Computer Vision & Edge AI Developer",
+    "Blockchain Forensics & Anomaly Detection Builder"
   ];
   
   let dIndex = 0;
