@@ -181,9 +181,11 @@ function initAchievementsCounter() {
       if (entry.isIntersecting) {
         const numberEl = entry.target;
         const targetVal = parseInt(numberEl.getAttribute('data-target'), 10);
+        const prefix = numberEl.getAttribute('data-prefix') || '';
+        const suffix = numberEl.getAttribute('data-suffix') !== null ? numberEl.getAttribute('data-suffix') : '+';
         
         if (targetVal === 0) {
-          numberEl.textContent = '0';
+          numberEl.textContent = prefix + '0' + suffix;
           observer.unobserve(numberEl);
           return;
         }
@@ -194,9 +196,9 @@ function initAchievementsCounter() {
         
         const counterInterval = setInterval(() => {
           currentVal++;
-          numberEl.textContent = currentVal + (targetVal > 3 ? '+' : '+');
+          numberEl.textContent = prefix + currentVal + suffix;
           if (currentVal >= targetVal) {
-            numberEl.textContent = targetVal + (targetVal > 1 ? '+' : '+');
+            numberEl.textContent = prefix + targetVal + suffix;
             clearInterval(counterInterval);
           }
         }, stepTime);
@@ -235,7 +237,7 @@ function initSkillBars() {
   });
 }
 
-// 8. Contact Form Handling
+// 8. Contact Form Handling (Live Email Dispatch via FormSubmit AJAX + mailto fallback)
 function handleFormSubmit(event) {
   event.preventDefault();
 
@@ -246,34 +248,92 @@ function handleFormSubmit(event) {
   const submitBtn = document.getElementById('btn-submit-form');
   const toast = document.getElementById('success-toast');
 
-  // Simulated button loading
+  const nameVal = nameInput ? nameInput.value.trim() : '';
+  const emailVal = emailInput ? emailInput.value.trim() : '';
+  const subjectVal = subjectInput ? subjectInput.value.trim() : '';
+  const messageVal = messageInput ? messageInput.value.trim() : '';
+
+  if (!nameVal || !emailVal || !messageVal) {
+    alert('Please fill in your name, email, and message before sending.');
+    return;
+  }
+
+  // Update button loading state
   submitBtn.disabled = true;
   submitBtn.textContent = 'Sending Message...';
 
-  // Simulate server response
-  setTimeout(() => {
-    // Show Toast
-    toast.classList.add('active');
+  const payload = {
+    name: nameVal,
+    email: emailVal,
+    subject: subjectVal || 'Portfolio Contact Inquiry',
+    message: messageVal,
+    _subject: `New Portfolio Message from ${nameVal}: ${subjectVal || 'Inquiry'}`,
+    _template: 'table'
+  };
+
+  fetch('https://formsubmit.co/ajax/soham092510@gmail.com', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    }
+    throw new Error('Network response was not ok');
+  })
+  .then(data => {
+    // Show success toast
+    if (toast) {
+      const toastSpan = toast.querySelector('span');
+      if (toastSpan) {
+        toastSpan.textContent = 'Message sent successfully! Soham will get back to you soon.';
+      }
+      toast.classList.add('active');
+    }
 
     // Reset inputs
-    nameInput.value = '';
-    emailInput.value = '';
-    subjectInput.value = '';
-    messageInput.value = '';
-    
-    // Reset inputs placeholder active states
+    if (nameInput) nameInput.value = '';
+    if (emailInput) emailInput.value = '';
+    if (subjectInput) subjectInput.value = '';
+    if (messageInput) messageInput.value = '';
+
     document.querySelectorAll('.form-input').forEach(input => {
       input.dispatchEvent(new Event('blur'));
     });
 
+    submitBtn.textContent = 'Message Sent! ✓';
+    setTimeout(() => {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Send Message →';
+    }, 3000);
+
+    setTimeout(() => {
+      if (toast) toast.classList.remove('active');
+    }, 5000);
+  })
+  .catch(err => {
+    console.warn('FormSubmit AJAX request failed, offering mailto fallback:', err);
+    const mailtoUrl = `mailto:soham092510@gmail.com?subject=${encodeURIComponent(subjectVal || 'Portfolio Message from ' + nameVal)}&body=${encodeURIComponent('From: ' + nameVal + ' (' + emailVal + ')\n\n' + messageVal)}`;
+    window.location.href = mailtoUrl;
+
+    if (toast) {
+      const toastSpan = toast.querySelector('span');
+      if (toastSpan) {
+        toastSpan.textContent = 'Opened your email client to send the message directly to Soham!';
+      }
+      toast.classList.add('active');
+      setTimeout(() => {
+        toast.classList.remove('active');
+      }, 5000);
+    }
+
     submitBtn.disabled = false;
     submitBtn.textContent = 'Send Message →';
-
-    // Hide Toast after 4 seconds
-    setTimeout(() => {
-      toast.classList.remove('active');
-    }, 4000);
-  }, 1200);
+  });
 }
 
 // 9. Modals (Certificates and PDF viewer)
